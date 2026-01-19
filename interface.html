@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=<device-width>, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+    body { font-family: Arial, sans-serif; background:#f5f7fb; padding:20px; }
+    h2 { margin-top:30px; }
+    .card { 
+        background:#fff; 
+        padding:16px;
+        border-radius:8px;
+        box-shadow:0 2px 6px rgba(0,0,0,0.1); 
+        margin-bottom:20px;
+    width: 80%; }
+    input, button { 
+         padding:8px;
+         margin:6px 0;
+         width:50; }
+    button { cursor:pointer; 
+        background:rgb(161, 129, 42); 
+        color:rgb(255, 255, 255); 
+        border:none;
+        border-radius:6px; }
+    table { width:80%;
+        border-collapse:collapse;
+        margin-top:10px; }
+    th, td { border:1px solid rgb(221, 221, 221); 
+        padding:8px;
+        text-align:center; }
+    th { 
+        background:rgb(238, 242, 255);
+     }
+    .output { 
+        background:rgb(240, 243, 255);
+        padding:10px;
+        border-radius:6px;
+        margin-top:10px; }
+  </style>
+
+</head>
+<body>
+    <!-- Add Classroom -->
+  <div class="card">
+    <h2>Add Classroom</h2>
+    <input id="roomId" placeholder="Room ID" />
+    <input id="capacity" type="number" placeholder="Capacity" />
+    <input id="floorNo" type="number" placeholder="Floor Number" />
+    <label>
+      <input id="nearWashroom" type="checkbox" /> Near Washroom
+    </label>
+    <button onclick="addClassroom()">Add Classroom</button>
+  </div>
+
+  <!-- Classroom List -->
+  <div class="card">
+    <h2>All Classrooms</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Room ID</th>
+          <th>Capacity</th>
+          <th>Floor</th>
+          <th>Near Washroom</th>
+        </tr>
+      </thead>
+      <tbody id="classroomTable"></tbody>
+    </table>
+  </div>
+
+  <!-- Allocate Exam -->
+  <div class="card">
+    <h2>Allocate Exam Seats</h2>
+    <input id="totalStudents" type="number" placeholder="Total Students" />
+    <button onclick="allocateExam()">Allocate</button>
+    <div id="output" class="output"></div>
+  </div>
+ <script>
+    const classrooms = [];
+
+    function addClassroom() {
+      const roomId = document.getElementById('roomId').value;
+      const capacity = parseInt(document.getElementById('capacity').value);
+      const floorNo = parseInt(document.getElementById('floorNo').value);
+      const nearWashroom = document.getElementById('nearWashroom').checked;
+
+      if (!roomId || !capacity || !floorNo) return alert('Please fill all fields');
+
+      classrooms.push({ roomId, capacity, floorNo, nearWashroom });
+      renderTable();
+
+      document.getElementById('roomId').value = '';
+      document.getElementById('capacity').value = '';
+      document.getElementById('floorNo').value = '';
+      document.getElementById('nearWashroom').checked = false;
+    }
+   function renderTable() {
+      const tbody = document.getElementById('classroomTable');
+      tbody.innerHTML = '';
+      classrooms.forEach(c => {
+        tbody.innerHTML += `<tr>
+          <td>${c.roomId}</td>
+          <td>${c.capacity}</td>
+          <td>${c.floorNo}</td>
+          <td>${c.nearWashroom}</td>
+        </tr>`;
+      });
+    }
+
+    function allocateExam() {
+      let students = parseInt(document.getElementById('totalStudents').value);
+      const output = document.getElementById('output');
+      output.innerHTML = '';
+
+      if (!students) return alert('Enter total students');
+      const sorted = [...classrooms].sort((a, b) => {
+        if (a.floorNo !== b.floorNo) return a.floorNo - b.floorNo;
+        return b.capacity - a.capacity;
+      });
+
+      const allocated = [];
+      for (const room of sorted) {
+        if (students <= 0) break;
+        allocated.push(room);
+        students -= room.capacity;
+      }
+
+      if (students > 0) {
+        output.innerHTML = '<b>Not enough seats available</b>';
+        return;
+      }
+
+      output.innerHTML = '<b>Allocated Classrooms:</b><ul>' +
+        allocated.map(r => `<li>${r.roomId} (Floor ${r.floorNo}, Capacity ${r.capacity})</li>`).join('') +
+        '</ul>';
+    }
+  
+ </script>
+
+</body>
+</html>
